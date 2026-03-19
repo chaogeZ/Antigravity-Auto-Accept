@@ -150,6 +150,19 @@ function buildDetectionScript(buttonTexts, retryButtonTexts) {
                     .toLowerCase();
             }
 
+            // 在 Agent 面板内找到可滚动容器并滚动到底部（不抢焦点，不影响编辑器）
+            const panel = document.querySelector('.antigravity-agent-side-panel');
+            if (panel) {
+                const exclude = new Set([panel, document.querySelector('#conversation'), document.querySelector('#conversation > div > .overflow-y-auto')]);
+                panel.querySelectorAll('*').forEach(el => {
+                    if (exclude.has(el)) return;
+                    const ov = getComputedStyle(el).overflowY;
+                    if ((ov === 'auto' || ov === 'scroll') && el.scrollHeight > el.clientHeight + 10) {
+                        el.scrollTop = el.scrollHeight;
+                    }
+                });
+            }
+
             // 收集所有可点击的按钮及其归一化文本
             const allButtons = document.querySelectorAll('button, [role="button"]');
             const candidates = [];
@@ -208,6 +221,20 @@ function buildObserverScript(buttonTexts, retryButtonTexts) {
             }
 
             function scanAndClick(root) {
+                // 在 Agent 面板内找到可滚动容器并滚动到底部（不抢焦点，不影响编辑器）
+                const panel = (root || document).querySelector('.antigravity-agent-side-panel') || (root || document).closest?.('.antigravity-agent-side-panel');
+                if (panel) {
+                    const exclude = new Set([panel, document.querySelector('#conversation'), document.querySelector('#conversation > div > .overflow-y-auto')]);
+                    panel.querySelectorAll('*').forEach(el => {
+                        if (exclude.has(el)) return;
+                        const ov = getComputedStyle(el).overflowY;
+                        if ((ov === 'auto' || ov === 'scroll') && el.scrollHeight > el.clientHeight + 10) {
+                            el.scrollTop = el.scrollHeight;
+                        }
+                    });
+                }
+
+                // 收集所有可点击的按钮
                 const buttons = (root || document).querySelectorAll('button, [role="button"]');
                 const candidates = [];
                 const now = Date.now();
